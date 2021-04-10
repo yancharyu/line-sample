@@ -18,5 +18,4 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/line', [LineController::class, 'webhook']);
 Route::post('/line', [LineController::class, 'webhook']);
