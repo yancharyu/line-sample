@@ -29,7 +29,6 @@ class LineController extends Controller
         $signature = $request->headers->get(HTTPHeader::LINE_SIGNATURE);
         if (!SignatureValidator::validateSignature($request->getContent(), $this->channel_secret,
             $signature)) {
-            // TODO 不正アクセス
             Log::info('不正アクセス');
             abort(404);
         }
@@ -48,24 +47,34 @@ class LineController extends Controller
                 }
 
                 $text = $event->getText();
-                $reply_token = $event->getReplyToken();
+                $replyToken = $event->getReplyToken();
 
-                if($text == 'おはよう') {
-                    $reply_message = 'おはよう！今日も1日頑張ろう！';
-                } elseif ($text == 'こんにちは') {
-                    $reply_message = 'こんにちは！調子はどう？';
-                } elseif($text == 'こんばんは') {
-                    $reply_message = 'こんばんは！今日もお疲れ様！';
-                } else {
-                    $reply_message = 'その返信はまだできない！';
-                }
-
-                $text_message = new TextMessageBuilder($reply_message);
-                $lineBot->replyMessage($reply_token, $text_message);
+                $textMessage = new TextMessageBuilder($this->getReplyMessage($text));
+                $lineBot->replyMessage($replyToken, $textMessage);
             }
         } catch (Exception $e) {
             Log::error('error');
             return;
         }
+    }
+
+    /**
+     * リプライメッセージの中身お好きなように
+     * @param string $text
+     * @return string
+     */
+    public function getReplyMessage(string $text)
+    {
+        if($text == 'おはよう') {
+            $replyMessage = 'おはよう！今日も1日頑張ろう！';
+        } elseif ($text == 'こんにちは') {
+            $replyMessage = 'こんにちは！調子はどう？';
+        } elseif($text == 'こんばんは') {
+            $replyMessage = 'こんばんは！今日もお疲れ様！';
+        } else {
+            $replyMessage = 'その返信はまだできないよー！';
+        }
+
+        return $replyMessage;
     }
 }
